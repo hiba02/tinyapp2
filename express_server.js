@@ -2,11 +2,14 @@ const express = require("express");
 const app = express();
 const PORT = 8000; // default port 8080
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 //Setting Up EJS
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 const urlDatabase = {
+  // username: req.cookies["username"],
   b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
   abc3dd: "http://www.naver.com"
@@ -56,6 +59,19 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+//login
+app.post("/login", (req, res) => {
+  console.log("/login: ", req.body.username);
+  res.cookie("username", req.body.username);
+  res.redirect("/urls");
+});
+
+//logout
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  res.redirect("/urls");
+});
+
 // Create
 app.post("/urls", (req, res) => {
   console.log(req.body.longURL); // Log the POST request body to the console
@@ -84,7 +100,11 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { key: urlDatabase };
+  console.log("/urls: req.cookies", req.cookies["username"]);
+  let templateVars = {
+    username: req.cookies["username"],
+    key: urlDatabase
+  };
   res.render("urls_index", templateVars);
 });
 
