@@ -12,7 +12,12 @@ const urlDatabase = {
   abc3dd: "http://www.naver.com"
 };
 
-const generateRandomString = () => {};
+const generateRandomString = () => {
+  const id = Math.random()
+    .toString(36)
+    .substr(2, 6);
+  return id;
+};
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -51,9 +56,14 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+// Create
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  console.log(req.body.longURL); // Log the POST request body to the console
+  const newId = generateRandomString();
+  urlDatabase[newId] = req.body.longURL;
+  res.redirect("/urls");
+
+  // res.send("Ok"); // Respond with 'Ok' (we will replace this)
 });
 
 // Delete
