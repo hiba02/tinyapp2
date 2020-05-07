@@ -18,10 +18,10 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
-    <% if (username) {%>
+    <% if (user_info) {%>
     <h5 style="color:rgb(67, 67, 212)">
       Logged in as:
-      <span style="color:rgb(2, 0, 7)">&nbsp;<%= username %></span>
+      <span style="color:rgb(2, 0, 7)">&nbsp;<%= user_info.email %></span>
     </h5>
     &nbsp;&nbsp;
     <form
@@ -33,7 +33,7 @@
       <input
         type="submit"
         class="btn btn-outline-info"
-        name="<%= username %>"
+        name="<%= user_info %>"
         value="logout"
       />
     </form>
@@ -46,8 +46,8 @@
           <input
             class="form-control"
             type="text"
-            name="username"
-            placeholder="USER NAME"
+            name="user_id"
+            placeholder="USER ID"
             style="width: 300px; margin: 1em"
           />
           <button type="submit" class="btn btn-primary">Login</button>
@@ -55,6 +55,5 @@
       </form>
     </div>
     <% } %>
-    <!-- <p><%= username%></p> -->
   </nav>
 </header>

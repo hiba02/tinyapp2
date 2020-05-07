@@ -8,11 +8,26 @@ app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// url database
 const urlDatabase = {
   // username: req.cookies["username"],
   b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
   abc3dd: "http://www.naver.com"
+};
+
+// user database
+const users = {
+  wfyw52: {
+    id: "wfyw52",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  jowwxo: {
+    id: "jowwxo",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
 };
 
 const generateRandomString = () => {
@@ -57,7 +72,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"],
+    user_id: req.cookies["user_id"],
     key: urlDatabase
   };
   res.render("urls_new", templateVars);
@@ -66,19 +81,38 @@ app.get("/urls/new", (req, res) => {
 //login
 app.post("/login", (req, res) => {
   console.log("/login: ", req.body.username);
-  res.cookie("username", req.body.username);
+  res.cookie("user_id", req.body.username);
   res.redirect("/urls");
 });
 
 //logout
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
-// get-registration
+// GET /register
 app.get("/register", (req, res) => {
   res.render("register");
+});
+
+// POST /register
+app.post("/register", (req, res) => {
+  // console.log("/register req: ", req);
+  // add a new user object to the global users object
+  const id = generateRandomString();
+  const newUser = {
+    id: id,
+    email: req.body.email,
+    password: req.body.password
+  };
+  users[id] = newUser;
+  console.log("/register user: ", users);
+  // set cookie
+  res.cookie("user_id", id);
+
+  // redirect to urls
+  res.redirect("/urls");
 });
 
 // Create
@@ -108,10 +142,13 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 
+// GET urls
 app.get("/urls", (req, res) => {
-  console.log("/urls: req.cookies", req.cookies["username"]);
+  console.log("/urls: req.cookies", req.cookies["user_id"]);
+  let userId = req.cookies["user_id"];
   let templateVars = {
-    username: req.cookies["username"],
+    // user_id: req.cookies["user_id"],
+    user_info: users[userId],
     key: urlDatabase
   };
   res.render("urls_index", templateVars);
