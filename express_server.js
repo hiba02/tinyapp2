@@ -56,7 +56,11 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = {
+    username: req.cookies["username"],
+    key: urlDatabase
+  };
+  res.render("urls_new", templateVars);
 });
 
 //login
@@ -87,7 +91,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   console.log("delete: req.param", req.params.shortURL);
   const deleteShortURL = req.params.shortURL;
   delete urlDatabase[req.params.shortURL];
-  console.log(urlDatabase["req.params.shortURL"]);
+  console.log("delete:", urlDatabase["req.params.shortURL"]);
   res.redirect("/urls");
 });
 
