@@ -40,9 +40,21 @@ const generateRandomString = () => {
 
 const checkEmailFromUsers = formEmail => {
   for (let eachUser in users) {
-    // console.log("checkEmailFromUsers:", users[eachUser].email);
     if (users[eachUser].email === formEmail) {
       return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+const checkEmailAndPasswordFromUsers = (formEmail, formPassword) => {
+  for (let eachUser in users) {
+    if (
+      users[eachUser].email === formEmail &&
+      users[eachUser].password === formPassword
+    ) {
+      return users[eachUser].id;
     } else {
       return false;
     }
@@ -91,11 +103,29 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-//login
+// GET login
+app.get("/login", (req, res) => {
+  res.render("login", users);
+});
+
+// POST login
 app.post("/login", (req, res) => {
-  console.log("/login: ", req.body.username);
-  res.cookie("user_id", req.body.username);
-  res.redirect("/urls");
+  if (req.body.email.length === 0 || req.body.password.length === 0) {
+    res.redirect("/login");
+    // res.status(400).json({ error: "Sorry, error" });
+  } else if (
+    checkEmailAndPasswordFromUsers(req.body.email, req.body.password)
+  ) {
+    let id = checkEmailAndPasswordFromUsers(req.body.email, req.body.password);
+    // set cookie
+    console.log("user_id", id);
+    res.cookie("user_id", id);
+    // redirect to urls
+    res.redirect("/urls");
+  } else {
+    console.log("nonono");
+    res.redirect("/login");
+  }
 });
 
 //logout
@@ -111,19 +141,13 @@ app.get("/register", (req, res) => {
 
 // POST /register
 app.post("/register", (req, res) => {
-  // console.log("/register req: ", req);
   // add a new user object to the global users object
   const id = generateRandomString();
 
-  // If the e-mail or password are empty strings, send back a response with the 400 status code.
-
-  // console.log("/register req:", req.body.email.length);
   if (req.body.email.length === 0 || req.body.password.length === 0) {
-    // res.status(400);
     res.status(400).json({ error: "Sorry, error" });
     res.redirect("/register");
   } else if (checkEmailFromUsers(req.body.email)) {
-    console.log("yesyes");
     res.status(400).json({ error: "Sorry, error" });
   } else {
     const newUser = {
@@ -135,7 +159,6 @@ app.post("/register", (req, res) => {
     console.log("/register user: ", users);
     // set cookie
     res.cookie("user_id", id);
-
     // redirect to urls
     res.redirect("/urls");
   }
