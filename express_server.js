@@ -30,6 +30,7 @@ const users = {
   }
 };
 
+// helper functions
 const generateRandomString = () => {
   const id = Math.random()
     .toString(36)
@@ -37,6 +38,18 @@ const generateRandomString = () => {
   return id;
 };
 
+const checkEmailFromUsers = formEmail => {
+  for (let eachUser in users) {
+    // console.log("checkEmailFromUsers:", users[eachUser].email);
+    if (users[eachUser].email === formEmail) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+// routers
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -101,18 +114,31 @@ app.post("/register", (req, res) => {
   // console.log("/register req: ", req);
   // add a new user object to the global users object
   const id = generateRandomString();
-  const newUser = {
-    id: id,
-    email: req.body.email,
-    password: req.body.password
-  };
-  users[id] = newUser;
-  console.log("/register user: ", users);
-  // set cookie
-  res.cookie("user_id", id);
 
-  // redirect to urls
-  res.redirect("/urls");
+  // If the e-mail or password are empty strings, send back a response with the 400 status code.
+
+  // console.log("/register req:", req.body.email.length);
+  if (req.body.email.length === 0 || req.body.password.length === 0) {
+    // res.status(400);
+    res.status(400).json({ error: "Sorry, error" });
+    res.redirect("/register");
+  } else if (checkEmailFromUsers(req.body.email)) {
+    console.log("yesyes");
+    res.status(400).json({ error: "Sorry, error" });
+  } else {
+    const newUser = {
+      id: id,
+      email: req.body.email,
+      password: req.body.password
+    };
+    users[id] = newUser;
+    console.log("/register user: ", users);
+    // set cookie
+    res.cookie("user_id", id);
+
+    // redirect to urls
+    res.redirect("/urls");
+  }
 });
 
 // Create
