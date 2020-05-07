@@ -76,6 +76,11 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
+// get-registration
+app.get("/register", (req, res) => {
+  res.render("register");
+});
+
 // Create
 app.post("/urls", (req, res) => {
   console.log(req.body.longURL); // Log the POST request body to the console
