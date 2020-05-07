@@ -39,21 +39,11 @@
     </form>
     <% } else { %>
 
-    <div class="user-name">
-      <form class="form-inline" action="/login" method="POST">
-        <div class="form-group">
-          <label for="longURL">USER NAME:</label>
-          <input
-            class="form-control"
-            type="text"
-            name="user_id"
-            placeholder="USER ID"
-            style="width: 300px; margin: 1em"
-          />
-          <button type="submit" class="btn btn-primary">Login</button>
-        </div>
-      </form>
+    <div class="vertical-center">
+      <a href="/register" class="btn btn-light">Register</a>
+      &nbsp;&nbsp;<a href="/login" class="btn btn-primary">Login</a>
     </div>
+
     <% } %>
   </nav>
 </header>
