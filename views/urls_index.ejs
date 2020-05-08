@@ -31,10 +31,10 @@
           </tr>
         </thead>
         <tbody>
-          <% for(let url in key) { %>
+          <% for(let url in urlDB) { %>
           <tr>
             <td><a href="/urls/<%= url %>"><%= url %></a></td>
-            <td><%= key[url] %></td>
+            <td><%= urlDB[url].longURL %></td>
             <td>
               <a href="/urls/<%= url %>">
                 <button
