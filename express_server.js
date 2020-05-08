@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8000; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const bcrypt = require("bcrypt");
 //Setting Up EJS
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -29,12 +30,12 @@ const users = {
   wfyw52: {
     id: "wfyw52",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: bcrypt.hashSync("purple-monkey-dinosaur", 10)
   },
   jowwxo: {
     id: "jowwxo",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync("dishwasher-funk", 10)
   }
 };
 
@@ -65,7 +66,7 @@ const checkEmailAndPasswordForLogin = (formEmail, formPassword) => {
     );
     if (
       users[eachUser].email === formEmail &&
-      users[eachUser].password === formPassword
+      bcrypt.compareSync(formPassword, users[eachUser].password)
     ) {
       return true;
     }
@@ -76,16 +77,6 @@ const checkEmailAndPasswordForLogin = (formEmail, formPassword) => {
 
 const urlsForUser = id => {
   const newDB = { ...urlDatabase };
-  // for (let data in urlDatabase) {
-  //   if (urlDatabase[data].userID === id) {
-  //     urlDatabase[data] = {
-  //       longURL: urlDatabase[data].longURL,
-  //       userID: urlDatabase[data].userID
-  //     };
-  //   } else {
-  //     delete urlDatabase[data];
-  //   }
-  // }
 
   for (let data in newDB) {
     if (newDB[data].userID === id) {
@@ -106,7 +97,7 @@ const checkEmailAndPasswordFromUsers = (formEmail, formPassword) => {
   for (let eachUser in users) {
     if (
       users[eachUser].email === formEmail &&
-      users[eachUser].password === formPassword
+      bcrypt.compareSync(formPassword, users[eachUser].password)
     ) {
       console.log("matched");
       return users[eachUser].id;
@@ -215,10 +206,13 @@ app.post("/register", (req, res) => {
   } else if (checkEmailFromUsers(req.body.email)) {
     res.status(400).json({ error: "Sorry, error" });
   } else {
+    // apply for bcrypt
+    const password = req.body.password;
+    const hashedPassword = bcrypt.hashSync(password, 10);
     const newUser = {
       id: id,
       email: req.body.email,
-      password: req.body.password
+      password: hashedPassword
     };
     users[id] = newUser;
     console.log("/register user: ", users);
