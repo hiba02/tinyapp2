@@ -18,8 +18,10 @@ app.use(cookieParser());
 
 // new url database
 const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "wfyw52" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "wfyw52" },
+  a2cozr: { longURL: "https://www.yahoo.com", userID: "jowwxo" },
+  c3recz: { longURL: "https://www.naver.com", userID: "jowwxo" }
 };
 
 // user database
@@ -70,6 +72,33 @@ const checkEmailAndPasswordForLogin = (formEmail, formPassword) => {
   }
 
   return false;
+};
+
+const urlsForUser = id => {
+  const newDB = { ...urlDatabase };
+  // for (let data in urlDatabase) {
+  //   if (urlDatabase[data].userID === id) {
+  //     urlDatabase[data] = {
+  //       longURL: urlDatabase[data].longURL,
+  //       userID: urlDatabase[data].userID
+  //     };
+  //   } else {
+  //     delete urlDatabase[data];
+  //   }
+  // }
+
+  for (let data in newDB) {
+    if (newDB[data].userID === id) {
+      newDB[data] = {
+        longURL: newDB[data].longURL,
+        userID: newDB[data].userID
+      };
+    } else {
+      delete newDB[data];
+    }
+  }
+  console.log("urlsForUser: ", newDB);
+  return newDB;
 };
 
 const checkEmailAndPasswordFromUsers = (formEmail, formPassword) => {
@@ -237,12 +266,19 @@ app.post("/urls/:shortURL", (req, res) => {
 
 // GET urls
 app.get("/urls", (req, res) => {
-  console.log("/urls: req.cookies", req.cookies["user_id"]);
   let userId = req.cookies["user_id"];
+  if (!userId) {
+    console.log("/urls: no user id", userId);
+    res.redirect("/login");
+  }
+  const newDB = urlsForUser(userId);
+
+  // console.log("/urls: req.cookies", req.cookies["user_id"]);
   let templateVars = {
     // user_id: req.cookies["user_id"],
     user_info: users[userId],
-    urlDB: urlDatabase
+    // urlDB: urlDatabase
+    urlDB: newDB
   };
   res.render("urls_index", templateVars);
 });
