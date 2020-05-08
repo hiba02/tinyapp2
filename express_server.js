@@ -114,8 +114,13 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+// GET urls/new
 app.get("/urls/new", (req, res) => {
   let userId = req.cookies["user_id"];
+  if (!userId) {
+    console.log("/urls/new: no user id", userId);
+    res.redirect("/login");
+  }
   let templateVars = {
     // user_id: req.cookies["user_id"],
     user_info: users[userId],
