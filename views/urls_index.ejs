@@ -33,7 +33,7 @@
         <tbody>
           <% for(let url in urlDB) { %>
           <tr>
-            <td><a href="/urls/<%= url %>"><%= url %></a></td>
+            <td><a href="<%= urlDB[url].longURL %>"><%= url %></a></td>
             <td><%= urlDB[url].longURL %></td>
             <td>
               <a href="/urls/<%= url %>">
