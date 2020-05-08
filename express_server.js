@@ -231,9 +231,20 @@ app.post("/register", (req, res) => {
 
 // POST -Create
 app.post("/urls", (req, res) => {
+  let userId = req.cookies["user_id"];
+  if (!userId) {
+    console.log("/urls/new: no user id", userId);
+    res.redirect("/login");
+  }
   console.log(req.body.longURL); // Log the POST request body to the console
   const newId = generateRandomString();
-  urlDatabase[newId] = req.body.longURL;
+  // urlDatabase[newId] = req.body.longURL;
+  urlDatabase[newId] = {
+    longURL: req.body.longURL,
+    userID: userId
+  };
+  console.log("create: ", urlDatabase);
+
   res.redirect("/urls");
 
   // res.send("Ok"); // Respond with 'Ok' (we will replace this)
@@ -241,15 +252,27 @@ app.post("/urls", (req, res) => {
 
 // POST -Delete
 app.post("/urls/:shortURL/delete", (req, res) => {
-  console.log("delete: req.param", req.params.shortURL);
-  const deleteShortURL = req.params.shortURL;
-  delete urlDatabase[req.params.shortURL];
-  console.log("delete:", urlDatabase["req.params.shortURL"]);
-  res.redirect("/urls");
+  let userId = req.cookies["user_id"];
+  if (!userId) {
+    console.log("/urls/new: no user id", userId);
+    res.redirect("/login");
+  }
+  if (userId) {
+    console.log("delete: req.param", req.params.shortURL);
+    const deleteShortURL = req.params.shortURL;
+    delete urlDatabase[req.params.shortURL];
+    console.log("delete:", urlDatabase["req.params.shortURL"]);
+    res.redirect("/urls");
+  }
 });
 
 // POST - Edit
 app.post("/urls/:shortURL", (req, res) => {
+  let userId = req.cookies["user_id"];
+  if (!userId) {
+    console.log("/urls/new: no user id", userId);
+    res.redirect("/login");
+  }
   console.log("edit: req.cookies", req.cookies["user_id"]);
   console.log("edit: req.param", req.params.shortURL);
   console.log("edit: req.body", req.body);
@@ -290,6 +313,11 @@ app.get("/urls", (req, res) => {
 
 // GET - /urls/:shortURL
 app.get("/urls/:shortURL", (req, res) => {
+  let userId = req.cookies["user_id"];
+  if (!userId) {
+    console.log("/urls: no user id", userId);
+    res.redirect("/login");
+  }
   console.log("/urls/:shortURL req.params:", req.params);
   // let templateVars = { shortURL: req.params.shortURL, longURL: /* What goes here? */ };
   let templateVars = {
