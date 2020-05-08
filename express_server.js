@@ -42,23 +42,42 @@ const checkEmailFromUsers = formEmail => {
   for (let eachUser in users) {
     if (users[eachUser].email === formEmail) {
       return true;
-    } else {
-      return false;
     }
   }
+  return false;
+};
+
+const checkEmailAndPasswordForLogin = (formEmail, formPassword) => {
+  console.log("checkEmailAndPasswordForLogin: ", formEmail, formPassword);
+  for (let eachUser in users) {
+    console.log(
+      "inside for: ",
+      users[eachUser].email,
+      users[eachUser].password
+    );
+    if (
+      users[eachUser].email === formEmail &&
+      users[eachUser].password === formPassword
+    ) {
+      return true;
+    }
+  }
+
+  return false;
 };
 
 const checkEmailAndPasswordFromUsers = (formEmail, formPassword) => {
+  console.log("checkEmailAndPasswordFromUsers: ", formEmail, formPassword);
   for (let eachUser in users) {
     if (
       users[eachUser].email === formEmail &&
       users[eachUser].password === formPassword
     ) {
+      console.log("matched");
       return users[eachUser].id;
-    } else {
-      return false;
     }
   }
+  return false;
 };
 
 // routers
@@ -96,8 +115,10 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
+  let userId = req.cookies["user_id"];
   let templateVars = {
-    user_id: req.cookies["user_id"],
+    // user_id: req.cookies["user_id"],
+    user_info: users[userId],
     key: urlDatabase
   };
   res.render("urls_new", templateVars);
@@ -110,20 +131,22 @@ app.get("/login", (req, res) => {
 
 // POST login
 app.post("/login", (req, res) => {
+  let loginEmail = req.body.email;
+  let loginPassword = req.body.password;
+  console.log("login: ", loginEmail, loginPassword);
   if (req.body.email.length === 0 || req.body.password.length === 0) {
-    res.redirect("/login");
-    // res.status(400).json({ error: "Sorry, error" });
-  } else if (
-    checkEmailAndPasswordFromUsers(req.body.email, req.body.password)
-  ) {
+    // res.redirect("/login");
+    res.status(403).json({ error: "Sorry, error" });
+  } else if (checkEmailAndPasswordForLogin(loginEmail, loginPassword)) {
     let id = checkEmailAndPasswordFromUsers(req.body.email, req.body.password);
     // set cookie
     console.log("user_id", id);
+    // res.clearCookie("user_id");
     res.cookie("user_id", id);
     // redirect to urls
     res.redirect("/urls");
   } else {
-    console.log("nonono");
+    res.status(403).json({ error: "Sorry, error" });
     res.redirect("/login");
   }
 });
