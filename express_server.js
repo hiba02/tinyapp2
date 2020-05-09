@@ -11,7 +11,7 @@ const {
   checkEmailAndPasswordForLogin,
   urlsForUser,
   checkEmailAndPasswordFromUsers
-} = require("./helper");
+} = require("./helpers");
 const { urlDatabase, users } = require("./db/db");
 
 //Setting Up EJS

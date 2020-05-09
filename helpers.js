@@ -1,6 +1,15 @@
 const { urlDatabase, users } = require("./db/db");
 const bcrypt = require("bcrypt");
 // helper functions
+const getUserByEmail = function(email, database) {
+  for (let user in database) {
+    if (database[user].email === email) {
+      return user;
+    }
+  }
+  return false;
+};
+
 const generateRandomString = () => {
   const id = Math.random()
     .toString(36)
@@ -72,5 +81,6 @@ module.exports = {
   checkEmailFromUsers,
   checkEmailAndPasswordForLogin,
   urlsForUser,
-  checkEmailAndPasswordFromUsers
+  checkEmailAndPasswordFromUsers,
+  getUserByEmail
 };
