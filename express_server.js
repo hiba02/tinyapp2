@@ -13,11 +13,14 @@ const {
   checkEmailAndPasswordFromUsers
 } = require("./helpers");
 const { urlDatabase, users } = require("./db/db");
+const methodOverride = require("method-override");
 
 //Setting Up EJS
 app.set("view engine", "ejs");
+
 app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(cookieParser());
+app.use(methodOverride("_method"));
 
 app.use(
   cookieSession({
@@ -31,14 +34,6 @@ app.use(
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   })
 );
-
-// url database
-// const urlDatabase = {
-//   // username: req.cookies["username"],
-//   b2xVn2: "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com",
-//   abc3dd: "http://www.naver.com"
-// };
 
 // routers
 app.get("/", (req, res) => {
@@ -166,23 +161,22 @@ app.post("/urls", (req, res) => {
   res.redirect("/urls");
 });
 
-// POST -Delete
-app.post("/urls/:shortURL/delete", (req, res) => {
+// method override - delete
+app.delete("/urls/:shortURL", (req, res) => {
   let userId = req.session["user_id"];
 
   if (!userId) {
     res.redirect("/login");
   }
   if (userId) {
-    const deleteShortURL = req.params.shortURL;
     delete urlDatabase[req.params.shortURL];
 
     res.redirect("/urls");
   }
 });
 
-// POST - Edit
-app.post("/urls/:shortURL", (req, res) => {
+//  method override - put for edit
+app.put("/urls/:shortURL", (req, res) => {
   let userId = req.session["user_id"];
 
   if (!userId) {
@@ -230,7 +224,7 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL
   };
-  res.render("urls_show", templateVars);
+  res.render("urls_edit", templateVars);
 });
 
 app.listen(PORT, () => {

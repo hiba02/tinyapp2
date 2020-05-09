@@ -27,7 +27,11 @@
       class=""
       style="display: flex; align-items: center; justify-content: center;background-color: #ccc;"
     >
-      <form class="form-inline" action="/urls/<%= shortURL %>" method="POST">
+      <form
+        class="form-inline"
+        action="/urls/<%= shortURL %>?_method=put"
+        method="POST"
+      >
         <div class="form-group mb-2">
           <label for="longURL">Enter a new URL:</label>
           <input
