@@ -4,10 +4,33 @@ const PORT = 8000; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
+const cookieSession = require("cookie-session");
+const {
+  generateRandomString,
+  checkEmailFromUsers,
+  checkEmailAndPasswordForLogin,
+  urlsForUser,
+  checkEmailAndPasswordFromUsers
+} = require("./helper");
+const { urlDatabase, users } = require("./db/db");
+
 //Setting Up EJS
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser());
+// app.use(cookieParser());
+
+app.use(
+  cookieSession({
+    name: "session",
+    keys: [
+      "8a6f534d-a7ac-4e85-a512-e1bc1b2bf01c",
+      "12256e80-4f94-4d17-9d4e-57fd5ccb4d10"
+    ],
+
+    // Cookie Options
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  })
+);
 
 // url database
 // const urlDatabase = {
@@ -16,95 +39,6 @@ app.use(cookieParser());
 //   "9sm5xK": "http://www.google.com",
 //   abc3dd: "http://www.naver.com"
 // };
-
-// new url database
-const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "wfyw52" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "wfyw52" },
-  a2cozr: { longURL: "https://www.yahoo.com", userID: "jowwxo" },
-  c3recz: { longURL: "https://www.naver.com", userID: "jowwxo" }
-};
-
-// user database
-const users = {
-  wfyw52: {
-    id: "wfyw52",
-    email: "user@example.com",
-    password: bcrypt.hashSync("purple-monkey-dinosaur", 10)
-  },
-  jowwxo: {
-    id: "jowwxo",
-    email: "user2@example.com",
-    password: bcrypt.hashSync("dishwasher-funk", 10)
-  }
-};
-
-// helper functions
-const generateRandomString = () => {
-  const id = Math.random()
-    .toString(36)
-    .substr(2, 6);
-  return id;
-};
-
-const checkEmailFromUsers = formEmail => {
-  for (let eachUser in users) {
-    if (users[eachUser].email === formEmail) {
-      return true;
-    }
-  }
-  return false;
-};
-
-const checkEmailAndPasswordForLogin = (formEmail, formPassword) => {
-  console.log("checkEmailAndPasswordForLogin: ", formEmail, formPassword);
-  for (let eachUser in users) {
-    console.log(
-      "inside for: ",
-      users[eachUser].email,
-      users[eachUser].password
-    );
-    if (
-      users[eachUser].email === formEmail &&
-      bcrypt.compareSync(formPassword, users[eachUser].password)
-    ) {
-      return true;
-    }
-  }
-
-  return false;
-};
-
-const urlsForUser = id => {
-  const newDB = { ...urlDatabase };
-
-  for (let data in newDB) {
-    if (newDB[data].userID === id) {
-      newDB[data] = {
-        longURL: newDB[data].longURL,
-        userID: newDB[data].userID
-      };
-    } else {
-      delete newDB[data];
-    }
-  }
-  console.log("urlsForUser: ", newDB);
-  return newDB;
-};
-
-const checkEmailAndPasswordFromUsers = (formEmail, formPassword) => {
-  console.log("checkEmailAndPasswordFromUsers: ", formEmail, formPassword);
-  for (let eachUser in users) {
-    if (
-      users[eachUser].email === formEmail &&
-      bcrypt.compareSync(formPassword, users[eachUser].password)
-    ) {
-      console.log("matched");
-      return users[eachUser].id;
-    }
-  }
-  return false;
-};
 
 // routers
 app.get("/", (req, res) => {
@@ -144,7 +78,9 @@ app.get("/u/:shortURL", (req, res) => {
 
 // GET urls/new
 app.get("/urls/new", (req, res) => {
-  let userId = req.cookies["user_id"];
+  // let userId = req.cookies["user_id"];
+  let userId = req.session["user_id"];
+
   if (!userId) {
     console.log("/urls/new: no user id", userId);
     res.redirect("/login");
@@ -175,7 +111,11 @@ app.post("/login", (req, res) => {
     // set cookie
     console.log("user_id", id);
     // res.clearCookie("user_id");
-    res.cookie("user_id", id);
+    // res.cookie("user_id", id);
+
+    //cookie session
+    req.session["user_id"] = id;
+
     // redirect to urls
     res.redirect("/urls");
   } else {
@@ -186,7 +126,8 @@ app.post("/login", (req, res) => {
 
 //logout
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  // res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/urls");
 });
 
@@ -217,7 +158,11 @@ app.post("/register", (req, res) => {
     users[id] = newUser;
     console.log("/register user: ", users);
     // set cookie
-    res.cookie("user_id", id);
+    // res.cookie("user_id", id);
+
+    // cookie session
+    req.session["user_id"] = id;
+
     // redirect to urls
     res.redirect("/urls");
   }
@@ -225,7 +170,8 @@ app.post("/register", (req, res) => {
 
 // POST -Create
 app.post("/urls", (req, res) => {
-  let userId = req.cookies["user_id"];
+  // let userId = req.cookies["user_id"];
+  let userId = req.session["user_id"];
   if (!userId) {
     console.log("/urls/new: no user id", userId);
     res.redirect("/login");
@@ -246,7 +192,9 @@ app.post("/urls", (req, res) => {
 
 // POST -Delete
 app.post("/urls/:shortURL/delete", (req, res) => {
-  let userId = req.cookies["user_id"];
+  // let userId = req.cookies["user_id"];
+  let userId = req.session["user_id"];
+
   if (!userId) {
     console.log("/urls/new: no user id", userId);
     res.redirect("/login");
@@ -262,15 +210,17 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 // POST - Edit
 app.post("/urls/:shortURL", (req, res) => {
-  let userId = req.cookies["user_id"];
+  // let userId = req.cookies["user_id"];
+  let userId = req.session["user_id"];
+
   if (!userId) {
     console.log("/urls/new: no user id", userId);
     res.redirect("/login");
   }
-  console.log("edit: req.cookies", req.cookies["user_id"]);
+  console.log("edit: req.cookies", userId);
   console.log("edit: req.param", req.params.shortURL);
   console.log("edit: req.body", req.body);
-  const currentUserID = req.cookies["user_id"];
+  const currentUserID = req.session["user_id"];
   urlDatabase[req.params.shortURL] = {
     longURL: req.body.longURL,
     userID: currentUserID
@@ -283,7 +233,9 @@ app.post("/urls/:shortURL", (req, res) => {
 
 // GET urls
 app.get("/urls", (req, res) => {
-  let userId = req.cookies["user_id"];
+  // let userId = req.cookies["user_id"];
+  let userId = req.session["user_id"];
+
   if (!userId) {
     console.log("/urls: no user id", userId);
     res.redirect("/login");
@@ -307,7 +259,9 @@ app.get("/urls", (req, res) => {
 
 // GET - /urls/:shortURL
 app.get("/urls/:shortURL", (req, res) => {
-  let userId = req.cookies["user_id"];
+  // let userId = req.cookies["user_id"];
+  let userId = req.session["user_id"];
+
   if (!userId) {
     console.log("/urls: no user id", userId);
     res.redirect("/login");
